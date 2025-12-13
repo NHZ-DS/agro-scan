@@ -1,0 +1,14 @@
+# Ignorer l'environnement virtuel (TRES IMPORTANT)
+venv/
+.env
+
+# Ignorer les fichiers cache de Python
+__pycache__/
+*.py[cod]
+
+# Ignorer les fichiers système Mac/Windows
+.DS_Store
+Thumbs.db
+
+# Note : On N'IGNORE PAS le fichier .h5 car il est petit (~14Mo).
+# On veut qu'il soit sur GitHub pour que le projet marche tout de suite.
