@@ -3,14 +3,14 @@ import tensorflow as tf
 from PIL import Image, ImageOps
 import numpy as np
 
-# --- CONFIGURATION ---
+# --- CONFIGURATION DU DASHBOARD ---
 st.set_page_config(
     page_title="Agro-Scan AI",
     page_icon="🌻",
     layout="centered"
 )
 
-# --- STYLE CSS ---
+# --- CSS PERSONNALISÉ (UI/UX) ---
 st.markdown("""
     <style>
     .stApp { background-color: #F1F8E9; }
@@ -20,24 +20,28 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 
-# --- TITRE ---
+# --- HEADER ---
 st.title("🌻 Agro-Scan")
 st.markdown("<p style='text-align: center;'>Votre assistant expert en botanique</p>", unsafe_allow_html=True)
 
-# --- CHARGEMENT DU MODÈLE ---
+# --- GESTION DU MODÈLE ---
 @st.cache_resource
 def load_model():
-    # Assure-toi que le fichier .h5 est bien dans le même dossier
+    """
+    Charge le modèle TensorFlow (.h5) en cache pour éviter de le recharger
+    à chaque interaction utilisateur (Optimisation Latence).
+    """
     model = tf.keras.models.load_model('agro_scan_model.h5')
     return model
 
-with st.spinner('Démarrage du moteur IA...'):
+with st.spinner('Initialisation du moteur d\'inférence...'):
     model = load_model()
 
-# --- CLASSES ---
+# --- CONSTANTES ---
+# L'ordre des classes doit correspondre exactement aux indices de l'entraînement (train_generator.class_indices)
 CLASS_NAMES = ['Marguerite (Daisy)', 'Pissenlit (Dandelion)', 'Rose', 'Tournesol (Sunflower)', 'Tulipe']
 
-# --- CONSEILS ---
+# Base de connaissances métier (Agri-Tech)
 ADVICE = {
     'Marguerite (Daisy)': "🌸 **Conseil :** Idéale pour les bordures. Aime le plein soleil.",
     'Pissenlit (Dandelion)': "🥗 **Info :** Comestible ! Les feuilles se mangent en salade.",
@@ -46,37 +50,58 @@ ADVICE = {
     'Tulipe': "🌷 **Plantation :** Plantez les bulbes en automne avant les gelées."
 }
 
-# --- PRÉDICTION ---
+# --- PIPELINE DE PRÉDICTION ---
 def predict(image_data, model):
+    """
+    Prépare l'image et effectue l'inférence via le modèle CNN.
+    
+    Étapes :
+    1. Resize : 160x160 (Contrainte d'entrée MobileNetV2).
+    2. Normalisation : Pixel / 255.0 (Mise à l'échelle 0-1 comme lors de l'entraînement).
+    3. Batching : Ajout d'une dimension pour créer un tenseur (1, 160, 160, 3).
+    """
+    # 1. Redimensionnement avec filtre LANCZOS pour préserver la qualité des détails
     size = (160, 160)
     image = ImageOps.fit(image_data, size, Image.Resampling.LANCZOS)
+    
+    # 2. Conversion en tableau NumPy
     img_array = np.asarray(image)
+    
+    # 3. Normalisation (Scaling)
     normalized_image_array = (img_array.astype(np.float32) / 255.0)
+    
+    # 4. Expansion de dimension (Batch Dimension)
     data = np.expand_dims(normalized_image_array, axis=0)
+
+    # 5. Inférence
     prediction = model.predict(data)
     return prediction
 
-# --- INTERFACE ---
-uploaded_file = st.file_uploader("📸 Choisissez une photo de fleur", type=["jpg", "png", "jpeg"])
+# --- INTERFACE UTILISATEUR ---
+uploaded_file = st.file_uploader("📸 Importez une image pour analyse", type=["jpg", "png", "jpeg"])
 
 if uploaded_file is not None:
     image = Image.open(uploaded_file)
     
-    # CORRECTION ICI : use_container_width=True remplace use_column_width
-    st.image(image, caption='Photo analysée', use_container_width=True)
+    # Affichage responsive
+    st.image(image, caption='Image source', use_container_width=True)
     
-    if st.button("🔍 Identifier la plante"):
-        with st.spinner("Analyse des pétales en cours..."):
+    if st.button("🔍 Lancer le Diagnostic"):
+        with st.spinner("Analyse biométrique en cours..."):
             predictions = predict(image, model)
+            
+            # Post-traitement des probabilités
             class_index = np.argmax(predictions[0])
             result_text = CLASS_NAMES[class_index]
             confidence = np.max(predictions[0]) * 100
             
+            # Affichage du résultat
             st.markdown(f"""
             <div class="result-box">
-                <h2>C'est une <span style="color:#33691E">{result_text}</span> !</h2>
-                <p>Certitude IA : {confidence:.1f}%</p>
+                <h2>Identification : <span style="color:#33691E">{result_text}</span></h2>
+                <p>Indice de confiance : <b>{confidence:.2f}%</b></p>
             </div>
             """, unsafe_allow_html=True)
             
-            st.info(ADVICE.get(result_text, "Pas de conseil spécifique."))
+            # Affichage du conseil agronomique
+            st.info(ADVICE.get(result_text, "Analyse terminée."))
