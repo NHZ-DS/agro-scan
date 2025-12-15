@@ -55,5 +55,6 @@ Pourquoi **MobileNetV2** plutôt que ResNet50 ?
 Dans un contexte agricole ("Agro-Tech"), la connectivité est souvent limitée. J'ai privilégié une architecture optimisée pour le mobile (**Depthwise Separable Convolutions**) qui permet une inférence rapide même sur des appareils à faible puissance de calcul, contrairement à des modèles plus lourds comme VGG16.
 
 ## 👤 Auteur
-**[Ton Prénom] [Ton Nom]** - Étudiant Ingénieur IA
+**Nouhaila ERRAMI** - Étudiante en Mathématiques et Data Science
+
 *Projet réalisé dans le cadre de mon portfolio technique.*pip install streamlit tensorflow pillow numpy
