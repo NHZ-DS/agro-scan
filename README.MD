@@ -26,7 +26,7 @@ Le cœur du système repose sur une architecture **MobileNetV2** pré-entraîné
 
 1.  **Cloner le projet**
     ```bash
-    git clone [https://github.com/VOTRE-NOM/agro-scan.git](https://github.com/VOTRE-NOM/agro-scan.git)
+    git clone [https://github.com/NHZ-DS/agro-scan.git](https://github.com/NHZ-DS/agro-scan.git)
     cd agro-scan
     ```
 
