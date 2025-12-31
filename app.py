@@ -56,26 +56,31 @@ def predict(image_data, model):
     Prépare l'image et effectue l'inférence via le modèle CNN.
     
     Étapes :
-    1. Resize : 160x160 (Contrainte d'entrée MobileNetV2).
-    2. Normalisation : Pixel / 255.0 (Mise à l'échelle 0-1 comme lors de l'entraînement).
-    3. Batching : Ajout d'une dimension pour créer un tenseur (1, 160, 160, 3).
+    1. Convertir en RGB
+    2. Resize : 160x160 (Contrainte d'entrée MobileNetV2).
+    3. Normalisation : Pixel / 255.0 (Mise à l'échelle 0-1 comme lors de l'entraînement).
+    4. Batching : Ajout d'une dimension pour créer un tenseur (1, 160, 160, 3).
     """
-    # 1. Redimensionnement avec filtre LANCZOS pour préserver la qualité des détails
+    # 1. Conversion en RGB (important de faire ça avant le redimensionnement)
+    image_data = image_data.convert('RGB')
+
+    # 2. Redimensionnement avec filtre LANCZOS pour préserver la qualité des détails
     size = (160, 160)
     image = ImageOps.fit(image_data, size, Image.Resampling.LANCZOS)
-    
-    # 2. Conversion en tableau NumPy
+
+    # 3. Conversion en tableau NumPy
     img_array = np.asarray(image)
     
-    # 3. Normalisation (Scaling)
+    # 4. Normalisation (Scaling)
     normalized_image_array = (img_array.astype(np.float32) / 255.0)
     
-    # 4. Expansion de dimension (Batch Dimension)
+    # 5. Expansion de dimension (Batch Dimension)
     data = np.expand_dims(normalized_image_array, axis=0)
 
-    # 5. Inférence
+    # 6. Inférence
     prediction = model.predict(data)
     return prediction
+
 
 # --- INTERFACE UTILISATEUR ---
 uploaded_file = st.file_uploader("📸 Importez une image pour analyse", type=["jpg", "png", "jpeg"])
