@@ -56,5 +56,3 @@ Dans un contexte agricole ("Agro-Tech"), la connectivité est souvent limitée. 
 
 ## 👤 Auteur
 **Nouhaila ERRAMI** - Étudiante en Mathématiques et Data Science
-
-*Projet réalisé dans le cadre de mon portfolio technique.*pip install streamlit tensorflow pillow numpy
